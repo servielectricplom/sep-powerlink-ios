@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEP-PowerLink | Gestión de Alumbrado PWA</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#09131e">
+  <style>
+    :root {
+      --bg-dark: #09131e;
+      --bg-panel: #0f1f30;
+      --bg-card: #14283d;
+      --border-color: #1f3c5a;
+      --brand-navy: #0e3a60;
+      --brand-cyan: #00b4d8;
+      --brand-teal: #17bebb;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --status-on: #f59e0b;
+      --status-on-glow: rgba(245, 158, 11, 0.35);
+      --status-off: #475569;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(90deg, #071019 0%, #0d2136 100%);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(0, 180, 216, 0.3));
+    }
+
+    .brand-title h1 {
+      font-size: 1.15rem;
+      letter-spacing: 0.6px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .brand-title span {
+      color: var(--brand-cyan);
+    }
+
+    .brand-title p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mode-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      flex-shrink: 0;
+    }
+
+    .dot.sim {
+      background-color: var(--brand-cyan);
+      box-shadow: 0 0 8px var(--brand-cyan);
+    }
+
+    .btn {
+      padding: 8px 13px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--brand-cyan);
+      color: #06121e;
+    }
+
+    .btn-primary:hover {
+      background: #26c6e8;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-card);
+      border-color: var(--brand-cyan);
+    }
+
+    .btn-success {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--success);
+      color: #34d399;
+    }
+
+    .btn-success:hover {
+      background: var(--success);
+      color: #06121e;
+    }
+
+    .btn-warning {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: var(--status-on);
+      color: #fbbf24;
+    }
+
+    .btn-warning:hover {
+      background: var(--status-on);
+      color: #06121e;
+    }
+
+    .btn-danger-ghost {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+
+    .btn-danger-ghost:hover {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    .btn-on-all {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: var(--status-on);
+      color: #fbbf24;
+    }
+
+    .btn-on-all:hover {
+      background: var(--status-on);
+      color: #09131e;
+    }
+
+    .btn-off-all {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--danger);
+      color: #f87171;
+    }
+
+    .btn-off-all:hover {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.76rem;
+      border-radius: 6px;
+    }
+
+    .btn-xs {
+      padding: 4px 8px;
+      font-size: 0.74rem;
+      border-radius: 5px;
+    }
+
+    /* MAIN CONTAINER */
+    main {
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+      flex: 1;
+    }
+
+    /* SUMMARY KPI BAR */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .kpi-info p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .kpi-info h3 {
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    .kpi-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(0, 180, 216, 0.12);
+      color: var(--brand-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* MASTER ACTION BAR */
+    .master-bar {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .master-title h2 {
+      font-size: 1.02rem;
+      margin-bottom: 2px;
+    }
+
+    .master-title p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .master-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* FLOORS GRID */
+    .floors-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .floor-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .floor-header {
+      background: rgba(14, 58, 96, 0.35);
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .floor-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .floor-badge {
+      background: var(--brand-navy);
+      border: 1px solid var(--brand-cyan);
+      color: var(--brand-cyan);
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .floor-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* RESPONSIVE GRID PARA MÓVIL SIN DESBORDES */
+    .wings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .empty-floor {
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    /* CIRCUIT CARD CORREGIDO */
+    .circuit-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .circuit-card.active {
+      border-color: var(--status-on);
+      box-shadow: 0 0 18px var(--status-on-glow);
+    }
+
+    .circuit-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .circuit-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .circuit-meta h4 {
+      font-size: 0.96rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      word-break: break-word;
+      line-height: 1.3;
+    }
+
+    .meta-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .ip-tag {
+      font-family: monospace;
+      font-size: 0.76rem;
+      color: var(--brand-cyan);
+      background: rgba(0, 180, 216, 0.1);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .status-badge-net {
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .status-badge-net.online { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .status-badge-net.offline { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+    .lamps-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.76rem;
+      color: var(--text-main);
+    }
+
+    .lamp-step-btn {
+      background: var(--brand-navy);
+      color: #fff;
+      border: 1px solid var(--brand-cyan);
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lamp-step-btn:hover {
+      background: var(--brand-cyan);
+      color: #06121e;
+    }
+
+    .circuit-right-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .bulb-indicator {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 2px solid var(--status-off);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    .circuit-card.active .bulb-indicator {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: var(--status-on);
+      box-shadow: 0 0 14px var(--status-on);
+    }
+
+    .bulb-indicator svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--status-off);
+      transition: fill 0.25s ease;
+    }
+
+    .circuit-card.active .bulb-indicator svg {
+      fill: var(--status-on);
+    }
+
+    .circuit-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      width: 100%;
+    }
+
+    .status-text {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .circuit-card.active .status-text {
+      color: #fbbf24;
+    }
+
+    .circuit-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* TOGGLE SWITCH */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: .3s;
+      border-radius: 28px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--status-on);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    /* LOG CONSOLE */
+    .log-panel {
+      margin-top: 24px;
+      background: #060d14;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 18px;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      gap: 8px;
+    }
+
+    .log-box {
+      font-family: monospace;
+      font-size: 0.76rem;
+      height: 110px;
+      overflow-y: auto;
+      color: #38bdf8;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* MODAL */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      max-width: 720px;
+      width: 100%;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .form-input, .form-select {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      width: 100%;
+    }
+
+    .config-circuit-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 0.7fr;
+      gap: 8px;
+      align-items: center;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    @media (max-width: 520px) {
+      .config-circuit-row {
+        grid-template-columns: 1fr;
+      }
+      .config-header-labels {
+        display: none !important;
+      }
+      header {
+        padding: 12px 14px;
+      }
+      main {
+        padding: 14px;
+      }
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-box">
+      <img src="https://servielectricplom.com/imagenes/logos/servielectricplom-logo-kit/svg/servielectricplom-simbolo-sobre-oscuro.svg"
+           onerror="this.style.display='none'"
+           alt="SEP-PowerLink Logo" class="brand-logo" />
+      <div class="brand-title">
+        <h1><span>SEP</span>-PowerLink</h1>
+        <p>Gestión Centralizada de Alumbrado • Sincronización 3s</p>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="mode-badge">
+        <span class="dot sim" id="statusDot"></span>
+        <span id="modeText">Modo Simulación (Banco Local)</span>
+      </div>
+      <button class="btn btn-outline" id="btnToggleMode" onclick="toggleMode()">Cambiar a Red Real</button>
+      <button class="btn btn-warning" onclick="exportConfigJSON()">⬇ Exportar</button>
+      <label class="btn btn-warning" style="cursor:pointer; margin-bottom:0;">
+        ⬆ Importar <input type="file" id="importFile" accept=".json" style="display:none" onchange="importConfigJSON(event)">
+      </label>
+      <button class="btn btn-success" onclick="openAddFloorModal()">+ Piso</button>
+      <button class="btn btn-primary" onclick="openConfigModal()">⚙ Ajustes</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <p>Circuitos Activos</p>
+          <h3 id="activeCount">0 / 8</h3>
+        </div>
+        <div class="kpi-icon">⚡</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <p>Luminarias Encendidas</p>
+          <h3 id="lampsCount">0 / 65</h3>
+        </div>
+        <div class="kpi-icon">💡</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <p>Niveles Configurados</p>
+          <h3 id="floorsCount">4 Pisos</h3>
+        </div>
+        <div class="kpi-icon">🏢</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <p>Sincronización Automática</p>
+          <h3 id="syncStatus" style="color:var(--success);">Activa (Cada 3s)</h3>
+        </div>
+        <div class="kpi-icon">🔄</div>
+      </div>
+    </div>
+
+    <!-- MASTER CONTROLS -->
+    <div class="master-bar">
+      <div class="master-title">
+        <h2>Control Maestro y Multiusuario en Tiempo Real</h2>
+        <p>Los estados se guardan automáticamente y se sincronizan entre dispositivos</p>
+      </div>
+      <div class="master-buttons">
+        <button class="btn btn-on-all" onclick="setAllCircuits(true)">☀ Encender Todo</button>
+        <button class="btn btn-off-all" onclick="setAllCircuits(false)">🌑 Apagar Todo</button>
+      </div>
+    </div>
+
+    <!-- FLOORS LIST -->
+    <div class="floors-container" id="floorsContainer"></div>
+
+    <!-- CONSOLE LOG -->
+    <div class="log-panel">
+      <div class="log-header">
+        <span>Registro de Sincronización y Memoria (Polling 3s)</span>
+        <button class="btn btn-outline btn-sm" onclick="clearLogs()">Limpiar Consola</button>
+      </div>
+      <div class="log-box" id="logBox"></div>
+    </div>
+  </main>
+
+  <!-- MODAL AGREGAR PISO -->
+  <div class="modal-backdrop" id="addFloorModal">
+    <div class="modal" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3>Agregar Nuevo Piso / Nivel</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('addFloorModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nombre del Nivel / Piso:</label>
+          <input type="text" id="newFloorName" class="form-input" placeholder="Ej. Piso 5 (Azotea / Gimnasio)" />
+        </div>
+        <div class="form-group">
+          <label>¿Crear 2 circuitos iniciales (Ala Norte y Ala Sur)?</label>
+          <select id="newFloorAutoCircuits" class="form-select">
+            <option value="yes">Sí, crear con 2 circuitos por defecto (8 lámparas c/u)</option>
+            <option value="no">No, crear piso vacío para agregar circuitos manualmente</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="btn btn-outline" onclick="closeModal('addFloorModal')">Cancelar</button>
+        <button class="btn btn-success" onclick="confirmAddFloor()">Crear Piso</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL AGREGAR CIRCUITO -->
+  <div class="modal-backdrop" id="addCircuitModal">
+    <div class="modal" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 id="addCircuitModalTitle">Agregar Nuevo Circuito</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('addCircuitModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="targetFloorId" />
+        <div class="form-group">
+          <label>Nombre del Ala o Circuito:</label>
+          <input type="text" id="newCircuitName" class="form-input" placeholder="Ej. Ala Este - Pasillo Canchas" />
+        </div>
+        <div class="form-group">
+          <label>Dirección IP del Módulo ESP-01S:</label>
+          <input type="text" id="newCircuitIp" class="form-input" placeholder="Ej. 192.168.50.51" />
+        </div>
+        <div class="form-group">
+          <label>Cantidad de Lámparas en este Circuito:</label>
+          <input type="number" id="newCircuitLamps" class="form-input" value="8" min="0" max="100" />
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="btn btn-outline" onclick="closeModal('addCircuitModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmAddCircuit()">Agregar Circuito</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIGURACIÓN MASIVA -->
+  <div class="modal-backdrop" id="configModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Ajustes de Red, IPs y Dispositivos</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('configModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Firmware en los módulos ESP-01S:</label>
+          <select id="firmwareType" class="form-select">
+            <option value="custom">Firmware Personalizado SERVIELECTRICPLOM (/relay?state=on)</option>
+            <option value="tasmota">Firmware Tasmota Estándar (/cm?cmnd=Power%20ON)</option>
+          </select>
+        </div>
+        <div class="config-header-labels" style="font-size: 0.78rem; color: var(--text-muted); display: grid; grid-template-columns: 1.4fr 1fr 0.7fr; padding: 0 12px;">
+          <span>Nombre del Circuito</span>
+          <span>Dirección IP</span>
+          <span>Lámparas</span>
+        </div>
+        <div id="ipInputsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger-ghost btn-sm" onclick="resetToDefault()">Restaurar Fábrica</button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline" onclick="closeModal('configModal')">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveConfig()">Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Desarrollado por <strong>SERVIELECTRICPLOM</strong> • SEP-PowerLink PWA
+  </footer>
+
+  <script>
+    const defaultData = {
+      floors: [
+        { id: 'f1', name: 'Piso 1 (Planta Baja)' },
+        { id: 'f2', name: 'Piso 2' },
+        { id: 'f3', name: 'Piso 3' },
+        { id: 'f4', name: 'Piso 4' }
+      ],
+      circuits: [
+        { id: 'c1', floorId: 'f1', wing: 'Ala Norte - Pasillo Principal', lamps: 9, ip: '192.168.50.11', state: false, online: false },
+        { id: 'c2', floorId: 'f1', wing: 'Ala Sur - Pasillo Aulas', lamps: 8, ip: '192.168.50.12', state: false, online: false },
+        { id: 'c3', floorId: 'f2', wing: 'Ala Norte - Pasillo Primaria', lamps: 8, ip: '192.168.50.21', state: false, online: false },
+        { id: 'c4', floorId: 'f2', wing: 'Ala Sur - Pasillo Laboratorios', lamps: 8, ip: '192.168.50.22', state: false, online: false },
+        { id: 'c5', floorId: 'f3', wing: 'Ala Norte - Pasillo Bachillerato', lamps: 8, ip: '192.168.50.31', state: false, online: false },
+        { id: 'c6', floorId: 'f3', wing: 'Ala Sur - Pasillo Administración', lamps: 8, ip: '192.168.50.32', state: false, online: false },
+        { id: 'c7', floorId: 'f4', wing: 'Ala Norte - Pasillo Superior', lamps: 8, ip: '192.168.50.41', state: false, online: false },
+        { id: 'c8', floorId: 'f4', wing: 'Ala Sur - Pasillo Biblioteca', lamps: 8, ip: '192.168.50.42', state: false, online: false }
+      ]
+    };
+
+    function loadSavedState() {
+      try {
+        const raw = localStorage.getItem('sep_powerlink_state');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.floors) && Array.isArray(parsed.circuits)) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.error('Error leyendo almacenamiento local:', e);
+      }
+      return JSON.parse(JSON.stringify(defaultData));
+    }
+
+    let appState = loadSavedState();
+    let isRealMode = localStorage.getItem('sep_powerlink_realmode') === 'true';
+    let firmwareType = localStorage.getItem('sep_powerlink_fw') || 'custom';
+
+    function persist() {
+      try {
+        localStorage.setItem('sep_powerlink_state', JSON.stringify(appState));
+      } catch (e) {
+        console.error('Error guardando estado:', e);
+      }
+    }
+
+    function addLog(msg, isError = false) {
+      const logBox = document.getElementById('logBox');
+      if (!logBox) return;
+      const time = new Date().toLocaleTimeString();
+      const line = document.createElement('div');
+      line.style.color = isError ? '#f87171' : '#38bdf8';
+      line.textContent = `[${time}] ${msg}`;
+      logBox.prepend(line);
+      if (logBox.children.length > 50) {
+        logBox.removeChild(logBox.lastChild);
+      }
+    }
+
+    function clearLogs() {
+      const logBox = document.getElementById('logBox');
+      if (logBox) logBox.innerHTML = '';
+    }
+
+    function applyModeUI() {
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('modeText');
+      const btn = document.getElementById('btnToggleMode');
+      if (isRealMode) {
+        dot.classList.remove('sim');
+        text.textContent = 'Modo Red Real (Sondeo ESP-01S)';
+        if (btn) btn.textContent = 'Cambiar a Simulación';
+      } else {
+        dot.classList.add('sim');
+        text.textContent = 'Modo Simulación (Banco Local)';
+        if (btn) btn.textContent = 'Cambiar a Red Real';
+      }
+    }
+
+    function toggleMode() {
+      isRealMode = !isRealMode;
+      localStorage.setItem('sep_powerlink_realmode', isRealMode);
+      applyModeUI();
+      renderFloors();
+      if (isRealMode) {
+        addLog('Modo RED REAL activado. Sincronización automática cada 3s.');
+        pollESPModules();
+      } else {
+        addLog('Modo SIMULACIÓN activado. Estados guardados en memoria local.');
+      }
+    }
+
+    // EXPORTAR CONFIGURACIÓN JSON
+    function exportConfigJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "sep_powerlink_config.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      addLog('Configuración exportada exitosamente a archivo JSON.');
+    }
+
+    // IMPORTAR CONFIGURACIÓN JSON
+    function importConfigJSON(event) {
+      const fileReader = new FileReader();
+      if (event.target.files[0]) {
+        fileReader.readAsText(event.target.files[0], "UTF-8");
+        fileReader.onload = function(e) {
+          try {
+            const imported = JSON.parse(e.target.result);
+            if (imported.floors && imported.circuits) {
+              appState = imported;
+              persist();
+              renderFloors();
+              addLog('Configuración importada y guardada correctamente.');
+              alert('¡Configuración importada con éxito!');
+            } else {
+              alert('El archivo JSON no tiene la estructura correcta.');
+            }
+          } catch (err) {
+            alert('Error leyendo el archivo JSON.');
+          }
+        };
+      }
+    }
+
+    // COMUNICACIÓN HTTP CON ESP-01S
+    async function sendCommandToESP(circuit, targetState) {
+      const actionStr = targetState ? 'ON' : 'OFF';
+      const url = firmwareType === 'tasmota'
+        ? `http://${circuit.ip}/cm?cmnd=Power%20${actionStr}`
+        : `http://${circuit.ip}/relay?state=${targetState ? 'on' : 'off'}`;
+
+      if (!isRealMode) {
+        addLog(`[SIM] ${circuit.wing} -> ${actionStr} (Guardado)`);
+        return true;
+      }
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        await fetch(url, { mode: 'no-cors', signal: controller.signal });
+        clearTimeout(timeoutId);
+        addLog(`✓ Comando ${actionStr} enviado a ${circuit.ip} (${circuit.wing})`);
+        return true;
+      } catch (err) {
+        addLog(`✕ Error enviando comando a ${circuit.ip}`, true);
+        return false;
+      }
+    }
+
+    // POLLING AUTOMÁTICO CADA 3 SEGUNDOS
+    async function pollESPModules() {
+      if (!isRealMode) return;
+      let changed = false;
+
+      for (let c of appState.circuits) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 2000);
+          const response = await fetch(`http://${c.ip}/status`, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (response.ok) {
+            const data = await response.json();
+            if (!c.online) {
+              c.online = true;
+              changed = true;
+            }
+            const remoteState = (data.relay === 'ON' || data.state === 'ON' || data.state === 'on' || data.state === true);
+            if (c.state !== remoteState) {
+              c.state = remoteState;
+              changed = true;
+              addLog(`[SYNC 3s] Estado actualizado desde red para ${c.wing}: ${remoteState ? 'ON' : 'OFF'}`);
+            }
+          } else {
+            if (c.online) { c.online = false; changed = true; }
+          }
+        } catch (err) {
+          if (c.online) { c.online = false; changed = true; }
+        }
+      }
+
+      if (changed) {
+        persist();
+        renderFloors();
+      }
+    }
+    setInterval(pollESPModules, 3000);
+
+    async function toggleCircuit(id, forceState = null) {
+      const idx = appState.circuits.findIndex(c => c.id === id);
+      if (idx === -1) return;
+      const targetState = forceState !== null ? forceState : !appState.circuits[idx].state;
+      
+      appState.circuits[idx].state = targetState;
+      persist();
+      renderFloors();
+      
+      await sendCommandToESP(appState.circuits[idx], targetState);
+    }
+
+    async function setFloorCircuits(floorId, targetState) {
+      const floorCircuits = appState.circuits.filter(c => c.floorId === floorId);
+      for (const c of floorCircuits) {
+        c.state = targetState;
+      }
+      persist();
+      renderFloors();
+
+      for (const c of floorCircuits) {
+        await sendCommandToESP(c, targetState);
+      }
+    }
+
+    async function setAllCircuits(targetState) {
+      addLog(`Maestro: ${targetState ? 'ENCENDER TODO' : 'APAGAR TODO'}`);
+      for (const c of appState.circuits) {
+        c.state = targetState;
+      }
+      persist();
+      renderFloors();
+
+      for (const c of appState.circuits) {
+        await sendCommandToESP(c, targetState);
+      }
+    }
+
+    function adjustLamps(circuitId, delta) {
+      const c = appState.circuits.find(item => item.id === circuitId);
+      if (!c) return;
+      c.lamps = Math.max(0, (parseInt(c.lamps) || 0) + delta);
+      persist();
+      renderFloors();
+    }
+
+    function openAddFloorModal() {
+      document.getElementById('newFloorName').value = `Piso ${appState.floors.length + 1}`;
+      document.getElementById('addFloorModal').classList.add('open');
+    }
+
+    function confirmAddFloor() {
+      const name = document.getElementById('newFloorName').value.trim();
+      const autoCircuits = document.getElementById('newFloorAutoCircuits').value;
+      if (!name) return alert('Ingresa nombre del piso.');
+
+      const newFloorId = 'f_' + Date.now();
+      const floorNumber = appState.floors.length + 1;
+      appState.floors.push({ id: newFloorId, name });
+
+      if (autoCircuits === 'yes') {
+        appState.circuits.push(
+          { id: 'c_' + Date.now() + '_1', floorId: newFloorId, wing: 'Ala Norte - Pasillo', lamps: 8, ip: `192.168.50.${floorNumber}1`, state: false, online: false },
+          { id: 'c_' + Date.now() + '_2', floorId: newFloorId, wing: 'Ala Sur - Pasillo', lamps: 8, ip: `192.168.50.${floorNumber}2`, state: false, online: false }
+        );
+      }
+
+      persist();
+      renderFloors();
+      closeModal('addFloorModal');
+      addLog(`Piso agregado: "${name}".`);
+    }
+
+    function deleteFloor(floorId) {
+      const floor = appState.floors.find(f => f.id === floorId);
+      if (!floor || !confirm(`¿Eliminar "${floor.name}" y sus circuitos?`)) return;
+
+      appState.floors = appState.floors.filter(f => f.id !== floorId);
+      appState.circuits = appState.circuits.filter(c => c.floorId !== floorId);
+      persist();
+      renderFloors();
+      addLog(`Piso eliminado: "${floor.name}".`, true);
+    }
+
+    function openAddCircuitModal(floorId) {
+      const floor = appState.floors.find(f => f.id === floorId);
+      const floorIndex = appState.floors.findIndex(f => f.id === floorId) + 1;
+      const countInFloor = appState.circuits.filter(c => c.floorId === floorId).length + 1;
+
+      document.getElementById('targetFloorId').value = floorId;
+      document.getElementById('addCircuitModalTitle').textContent = `Agregar Circuito en ${floor ? floor.name : ''}`;
+      document.getElementById('newCircuitName').value = `Circuito ${countInFloor} - Pasillo`;
+      document.getElementById('newCircuitIp').value = `192.168.50.${floorIndex}${countInFloor}`;
+      document.getElementById('newCircuitLamps').value = 8;
+      document.getElementById('addCircuitModal').classList.add('open');
+    }
+
+    function confirmAddCircuit() {
+      const floorId = document.getElementById('targetFloorId').value;
+      const wing = document.getElementById('newCircuitName').value.trim();
+      const ip = document.getElementById('newCircuitIp').value.trim() || '192.168.50.99';
+      const lamps = Math.max(0, parseInt(document.getElementById('newCircuitLamps').value) || 0);
+
+      if (!wing) return alert('Ingresa el nombre.');
+
+      appState.circuits.push({ id: 'c_' + Date.now(), floorId, wing, lamps, ip, state: false, online: false });
+      persist();
+      renderFloors();
+      closeModal('addCircuitModal');
+      addLog(`Circuito agregado: "${wing}" (${ip}).`);
+    }
+
+    function deleteCircuit(circuitId) {
+      const c = appState.circuits.find(item => item.id === circuitId);
+      if (!c || !confirm(`¿Eliminar circuito "${c.wing}"?`)) return;
+
+      appState.circuits = appState.circuits.filter(item => item.id !== circuitId);
+      persist();
+      renderFloors();
+      addLog(`Circuito eliminado: "${c.wing}".`, true);
+    }
+
+    function renderFloors() {
+      const container = document.getElementById('floorsContainer');
+      container.innerHTML = '';
+
+      let activeCircuits = 0;
+      let totalCircuits = appState.circuits.length;
+      let activeLamps = 0;
+      let totalLamps = 0;
+
+      appState.circuits.forEach(c => {
+        const l = parseInt(c.lamps) || 0;
+        totalLamps += l;
+        if (c.state) {
+          activeCircuits++;
+          activeLamps += l;
+        }
+      });
+
+      appState.floors.forEach((floor, index) => {
+        const floorItems = appState.circuits.filter(c => c.floorId === floor.id);
+        const floorCard = document.createElement('div');
+        floorCard.className = 'floor-card';
+
+        floorCard.innerHTML = `
+          <div class="floor-header">
+            <div class="floor-name">
+              <span class="floor-badge">NIVEL 0${index + 1}</span>
+              <strong>${floor.name}</strong>
+              <span style="font-size:0.78rem; color:var(--text-muted);">(${floorItems.length} circuitos)</span>
+            </div>
+            <div class="floor-actions">
+              <button class="btn btn-success btn-sm" onclick="openAddCircuitModal('${floor.id}')">+ Circuito</button>
+              <button class="btn btn-outline btn-sm" onclick="setFloorCircuits('${floor.id}', true)">Encender Todo</button>
+              <button class="btn btn-outline btn-sm" onclick="setFloorCircuits('${floor.id}', false)">Apagar Todo</button>
+              <button class="btn btn-danger-ghost btn-sm" onclick="deleteFloor('${floor.id}')">🗑 Piso</button>
+            </div>
+          </div>
+          <div class="wings-grid" id="wings-${floor.id}"></div>
+        `;
+
+        container.appendChild(floorCard);
+        const wingsGrid = floorCard.querySelector(`#wings-${floor.id}`);
+
+        if (floorItems.length === 0) {
+          wingsGrid.innerHTML = `<div class="empty-floor">Sin circuitos. Haz clic en <strong>"+ Circuito"</strong>.</div>`;
+          return;
+        }
+
+        floorItems.forEach(item => {
+          const card = document.createElement('div');
+          card.className = `circuit-card ${item.state ? 'active' : ''}`;
+          card.innerHTML = `
+            <div class="circuit-top">
+              <div class="circuit-meta">
+                <h4>${item.wing}</h4>
+                <div class="meta-tags">
+                  <span class="ip-tag">IP: ${item.ip}</span>
+                  <span class="status-badge-net ${isRealMode ? (item.online ? 'online' : 'offline') : 'online'}">
+                    ${isRealMode ? (item.online ? '● Online' : '○ Offline') : '● Simulado'}
+                  </span>
+                  <span class="lamps-control">
+                    <button class="lamp-step-btn" onclick="adjustLamps('${item.id}', -1)">−</button>
+                    <span><strong>${item.lamps}</strong> Lámparas</span>
+                    <button class="lamp-step-btn" onclick="adjustLamps('${item.id}', 1)">+</button>
+                  </span>
+                </div>
+              </div>
+              <div class="circuit-right-tools">
+                <div class="bulb-indicator">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div class="circuit-bottom">
+              <span class="status-text">${item.state ? '● CONTACTOR ACTIVADO (ON)' : '○ APAGADO (OFF)'}</span>
+              <div class="circuit-actions-group">
+                <button class="btn btn-danger-ghost btn-xs" onclick="deleteCircuit('${item.id}')">Eliminar</button>
+                <label class="switch">
+                  <input type="checkbox" ${item.state ? 'checked' : ''} onchange="toggleCircuit('${item.id}')">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          `;
+          wingsGrid.appendChild(card);
+        });
+      });
+
+      document.getElementById('activeCount').textContent = `${activeCircuits} / ${totalCircuits}`;
+      document.getElementById('lampsCount').textContent = `${activeLamps} / ${totalLamps}`;
+      document.getElementById('floorsCount').textContent = `${appState.floors.length} Pisos`;
+    }
+
+    function openConfigModal() {
+      document.getElementById('firmwareType').value = firmwareType;
+      const list = document.getElementById('ipInputsContainer');
+      list.innerHTML = '';
+
+      appState.circuits.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'config-circuit-row';
+        row.innerHTML = `
+          <input type="text" id="cfg-name-${c.id}" class="form-input" value="${c.wing}" />
+          <input type="text" id="cfg-ip-${c.id}" class="form-input" style="font-family:monospace;" value="${c.ip}" />
+          <input type="number" id="cfg-lamps-${c.id}" class="form-input" value="${c.lamps}" min="0" />
+        `;
+        list.appendChild(row);
+      });
+
+      document.getElementById('configModal').classList.add('open');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('open');
+    }
+
+    function saveConfig() {
+      firmwareType = document.getElementById('firmwareType').value;
+      localStorage.setItem('sep_powerlink_fw', firmwareType);
+
+      appState.circuits.forEach(c => {
+        const newName = document.getElementById(`cfg-name-${c.id}`).value.trim();
+        const newIp = document.getElementById(`cfg-ip-${c.id}`).value.trim();
+        const newLamps = parseInt(document.getElementById(`cfg-lamps-${c.id}`).value);
+
+        if (newName) c.wing = newName;
+        if (newIp) c.ip = newIp;
+        if (!isNaN(newLamps) && newLamps >= 0) c.lamps = newLamps;
+      });
+
+      persist();
+      renderFloors();
+      closeModal('configModal');
+      addLog('Ajustes guardados correctamente.');
+    }
+
+    function resetToDefault() {
+      if (!confirm('¿Restaurar valores de fábrica?')) return;
+      appState = JSON.parse(JSON.stringify(defaultData));
+      persist();
+      renderFloors();
+      closeModal('configModal');
+      addLog('Sistema restaurado a valores de fábrica.');
+    }
+
+    // Registro de Service Worker para PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => addLog('Service Worker PWA registrado correctamente.'))
+        .catch(err => console.log('Error SW:', err));
+    }
+
+    // Inicialización
+    applyModeUI();
+    renderFloors();
+    if (isRealMode) pollESPModules();
+    addLog('SEP-PowerLink inicializado. Persistencia y sondeo (3s) activos.');
+  </script>
+</body>
+</html>

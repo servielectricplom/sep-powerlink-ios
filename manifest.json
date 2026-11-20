@@ -1,0 +1,15 @@
+{
+  "name": "SEP-PowerLink | Control de Alumbrado",
+  "short_name": "SEP-PowerLink",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#09131e",
+  "theme_color": "#09131e",
+  "icons": [
+    {
+      "src": "https://servielectricplom.com/imagenes/logos/servielectricplom-logo-kit/svg/servielectricplom-simbolo-sobre-oscuro.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
