@@ -8,7 +8,9 @@
   "provider": "github",
   "codemagic": {},
   "bitrise": {},
-  "ios": {},
+  "ios": {
+    "path": "ios"
+  },
   "flutter": {
     "watch": {}
   },
