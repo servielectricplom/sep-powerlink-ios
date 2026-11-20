@@ -1,0 +1,11 @@
+{
+	"appId": "com.servielectricplom.powerlink",
+	"appName": "SEP-PowerLink",
+	"webDir": "www",
+	"server": {
+		"androidScheme": "http",
+		"iosScheme": "http",
+		"cleartext": true
+	},
+	"packageClassList": []
+}
