@@ -1,0 +1,18 @@
+{
+  "project": "sep-powerlink-ios",
+  "platform": "ios",
+  "github": {
+    "owner": "servielectricplom",
+    "repo": "sep-powerlink-ios"
+  },
+  "provider": "github",
+  "codemagic": {},
+  "bitrise": {},
+  "ios": {},
+  "flutter": {
+    "watch": {}
+  },
+  "reactNative": {},
+  "kmp": {},
+  "mobai": {}
+}
